@@ -222,19 +222,60 @@ if ! grep -qx 'export PATH="$HOME/bogachev/bin:$PATH"' "$ENV_FILE"; then
   echo "Added ~/bogachev/bin to PATH in ~/.bashrc"
 fi
 
-# === Apply new environment to this shell immediately ===
-echo "Reloading shell environment..."
-if [ -f "$ENV_FILE" ]; then
-  # shellcheck source=/dev/null
-  source "$ENV_FILE"
-  echo "Environment loaded: STUDENT_DISPLAY_NAME=$STUDENT_DISPLAY_NAME, PATH updated, ssh-agent running."
-fi
-
-# === Final step: Confirm ===
-echo "Setup complete!"
-echo "SSH key: $SSH_PATH"
-echo "Repo cloned to: $GITHUB_REPO_CLONE_DIR"
-
-# Disable cleanup on normal exit
+# Disable cleanup on normal exit (setup completed successfully)
 CLEANUP_REQUIRED=false
 
+# === Final step: Confirm ===
+echo ""
+echo "=========================================="
+echo "  ✓ Installation Complete!"
+echo "=========================================="
+echo ""
+echo "Configuration:"
+echo "  • Student name: $STUDENT_DISPLAY_NAME"
+echo "  • SSH key: $SSH_PATH"
+echo "  • Repository: $GITHUB_REPO_CLONE_DIR"
+echo "  • bog_push.sh installed to: $DEST_PATH"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "IMPORTANT: To use bog_push.sh, you need to reload your shell environment."
+echo ""
+echo "Choose an option:"
+echo "  1) Automatically start a new shell with environment loaded (recommended)"
+echo "  2) I will reload manually (run: source ~/.bashrc)"
+echo ""
+
+# Give user choice
+read -p "Enter your choice [1/2]: " -r RELOAD_CHOICE
+
+case "$RELOAD_CHOICE" in
+  1)
+    echo ""
+    echo "Starting a new shell with loaded environment..."
+    echo "Type 'exit' when you're done to return to the previous shell."
+    echo ""
+    # Load the environment and start a new interactive bash
+    exec bash --rcfile <(cat ~/.bashrc; echo "source $ENV_FILE"; echo "echo ''; echo '✓ Environment loaded. You can now use bog_push.sh'; echo 'Run: bog_push.sh <homework_number>'; echo ''")
+    ;;
+  2)
+    echo ""
+    echo "To activate the environment, run one of these commands:"
+    echo ""
+    echo "  source ~/.bashrc"
+    echo ""
+    echo "Or simply open a new terminal window."
+    echo ""
+    echo "After that, you can use: bog_push.sh <homework_number>"
+    echo ""
+    ;;
+  *)
+    echo ""
+    echo "Invalid choice. Please run manually:"
+    echo ""
+    echo "  source ~/.bashrc"
+    echo ""
+    echo "Then you can use: bog_push.sh <homework_number>"
+    echo ""
+    ;;
+esac
