@@ -4,12 +4,14 @@ set -euo pipefail
 # ============================================================================
 # uninstall.sh - Uninstall script for Bogachev homework submission system
 #
-# This script reverses all changes made by install.sh:
-#   - Removes SSH keys
-#   - Removes environment file
-#   - Removes bog_push script and ~/bogachev directory
-#   - Removes bashrc modifications
-#   - Optionally removes the cloned repository
+# This script removes:
+#   - SSH keys
+#   - Environment file (~/.bogachev_env)
+#   - bog_push script and ~/bogachev directory
+#   - Optionally: cloned repository
+#
+# NOTE: We don't modify ~/.bashrc - the source command will simply
+# do nothing once ~/.bogachev_env is removed.
 # ============================================================================
 
 # === Color output ===
@@ -58,7 +60,11 @@ echo "This will remove:"
 echo "  - SSH key: ${GITHUB_SSH_KEY_NAME:-<not set>}"
 echo "  - Environment file: $ENV_FILE"
 echo "  - bog_push script and ~/bogachev directory"
-echo "  - Modifications to ~/.bashrc"
+if [ -n "${CLONE_DIR:-}" ]; then
+  echo "  - Optionally: Repository at $CLONE_DIR"
+fi
+echo ""
+echo "NOTE: ~/.bashrc will NOT be modified (it's safe to keep)"
 echo ""
 
 read -p "Do you want to continue? [y/N]: " -r CONFIRM
@@ -90,24 +96,6 @@ else
   info "SSH key name not set, skipping key removal"
 fi
 
-# === Step 1.1: Remove GitHub from known_hosts (optional) ===
-if [ -f "$HOME/.ssh/known_hosts" ]; then
-  if grep -q "github.com" "$HOME/.ssh/known_hosts" 2>/dev/null; then
-    echo ""
-    read -p "Remove GitHub from known_hosts? [y/N]: " -r REMOVE_KNOWN_HOST
-    if [[ "$REMOVE_KNOWN_HOST" =~ ^[Yy]$ ]]; then
-      # Create a backup
-      cp "$HOME/.ssh/known_hosts" "$HOME/.ssh/known_hosts.backup.$(date +%Y%m%d%H%M%S)"
-      # Remove all github.com entries
-      grep -v "github.com" "$HOME/.ssh/known_hosts" > "$HOME/.ssh/known_hosts.tmp"
-      mv "$HOME/.ssh/known_hosts.tmp" "$HOME/.ssh/known_hosts"
-      success "✓ GitHub removed from known_hosts (backup created)"
-    else
-      info "GitHub kept in known_hosts"
-    fi
-  fi
-fi
-
 # === Step 2: Remove bog_push script and ~/bogachev directory ===
 BOGACHEV_DIR="$HOME/bogachev"
 if [ -d "$BOGACHEV_DIR" ]; then
@@ -127,70 +115,7 @@ else
   info "Environment file not found"
 fi
 
-# === Step 4: Remove bashrc modifications ===
-if [ -f "$HOME/.bashrc" ]; then
-  echo "Removing modifications from ~/.bashrc..."
-  
-  # Create a temporary file
-  TEMP_FILE=$(mktemp)
-  
-  # Remove the bogachev_env source block
-  # We'll use sed to remove lines between our markers and the block itself
-  awk '
-    /^# Source bogachev environment if it exists/ {
-      # Skip this line and the next few lines until we find the fi
-      skip=1
-      next
-    }
-    skip && /^fi$/ {
-      # Found the end of the block, skip this line too and stop skipping
-      skip=0
-      next
-    }
-    skip && /^  esac$/ {
-      # Part of our block, skip
-      next
-    }
-    skip && /case.*in$/ {
-      # Part of our block, skip
-      next
-    }
-    skip && /if \[ -f.*bogachev_env.*\]; then$/ {
-      # Part of our block, skip
-      next
-    }
-    skip && /\*i\).*source.*bogachev_env/ {
-      # Part of our block, skip
-      next
-    }
-    !skip {
-      # Not skipping, print the line
-      print
-    }
-  ' "$HOME/.bashrc" > "$TEMP_FILE"
-  
-  # Replace the original file
-  mv "$TEMP_FILE" "$HOME/.bashrc"
-  
-  success "✓ ~/.bashrc cleaned"
-else
-  warning "~/.bashrc not found"
-fi
-
-# === Step 5: Remove .bashrc backups (optional) ===
-echo ""
-BACKUP_COUNT=$(find "$HOME" -maxdepth 1 -name ".bashrc.backup.*" 2>/dev/null | wc -l)
-if [ "$BACKUP_COUNT" -gt 0 ]; then
-  read -p "Found $BACKUP_COUNT .bashrc backup file(s). Remove them? [y/N]: " -r REMOVE_BACKUPS
-  if [[ "$REMOVE_BACKUPS" =~ ^[Yy]$ ]]; then
-    find "$HOME" -maxdepth 1 -name ".bashrc.backup.*" -delete
-    success "✓ Backup files removed"
-  else
-    info "Backup files kept"
-  fi
-fi
-
-# === Step 6: Ask about repository ===
+# === Step 4: Ask about repository ===
 echo ""
 if [ -n "${GITHUB_REPO_CLONE_DIR:-}" ] && [ -d "$GITHUB_REPO_CLONE_DIR" ]; then
   warning "Repository directory: $GITHUB_REPO_CLONE_DIR"

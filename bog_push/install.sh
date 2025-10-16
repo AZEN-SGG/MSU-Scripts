@@ -163,6 +163,28 @@ else
   echo "Repository successfully cloned into $CLONE_DIR"
 fi
 
+# === Step 4.3: Configure git user identity for the repository ===
+echo "Configuring git user identity for the repository..."
+
+# Change to repository directory temporarily
+cd "$CLONE_DIR"
+
+# Set git user name based on student display name
+# Extract just the lastname part (before underscore)
+GIT_USER_NAME="${STUDENT_DISPLAY_NAME%%_*}"
+
+# Set generic email for MSU students
+GIT_USER_EMAIL="student@math.msu.ru"
+
+# Configure git user for this repository only (local config)
+git config user.name "$GIT_USER_NAME"
+git config user.email "$GIT_USER_EMAIL"
+
+echo "Git identity set: $GIT_USER_NAME <$GIT_USER_EMAIL>"
+
+# Return to previous directory
+cd - > /dev/null
+
 # === Write bogachev environment file ===
 cat > "$ENV_FILE" <<EOF
 # GitHub SSH and Repo settings
@@ -233,8 +255,9 @@ echo "=========================================="
 echo ""
 echo "Configuration:"
 echo "  • Student name: $STUDENT_DISPLAY_NAME"
+echo "  • Git identity: $GIT_USER_NAME <$GIT_USER_EMAIL>"
 echo "  • SSH key: $SSH_PATH"
-echo "  • Repository: $GITHUB_REPO_CLONE_DIR"
+echo "  • Repository: $CLONE_DIR"
 echo "  • bog_push.sh installed to: $DEST_PATH"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
