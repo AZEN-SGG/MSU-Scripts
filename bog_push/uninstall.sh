@@ -59,9 +59,10 @@ echo ""
 echo "This will remove:"
 echo "  - SSH key: ${GITHUB_SSH_KEY_NAME:-<not set>}"
 echo "  - Environment file: $ENV_FILE"
-echo "  - bog_push script and ~/bogachev directory"
-if [ -n "${CLONE_DIR:-}" ]; then
-  echo "  - Optionally: Repository at $CLONE_DIR"
+echo "  - bog_push.sh and bog_pull.sh scripts"
+echo "  - ~/bogachev directory"
+if [ -n "${GITHUB_REPO_CLONE_DIR:-}" ]; then
+  echo "  - Optionally: Repository at $GITHUB_REPO_CLONE_DIR"
 fi
 echo ""
 echo "NOTE: ~/.bashrc will NOT be modified (it's safe to keep)"

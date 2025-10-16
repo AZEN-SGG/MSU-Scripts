@@ -215,33 +215,39 @@ fi
 EOF
 fi
 
-# === Step 5: Install bog_push helper ===
+# === Step 5: Install bog_push and bog_pull helpers ===
 INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_NAME="bog_push.sh"
-SRC_PATH="$INSTALL_DIR/$SCRIPT_NAME"
 DEST_DIR="$HOME/bogachev/bin"
-DEST_PATH="$DEST_DIR/$SCRIPT_NAME"
 
 # Create ~/bogachev/bin directory if it doesn't exist
 mkdir -p "$DEST_DIR"
 
-# Check that the source script actually exists
-if [ ! -f "$SRC_PATH" ]; then
-  echo "Error: bog_push.sh not found at $SRC_PATH" >&2
+# Install bog_push.sh
+echo "Installing bog_push.sh..."
+if [ ! -f "$INSTALL_DIR/bog_push.sh" ]; then
+  echo "Error: bog_push.sh not found at $INSTALL_DIR/bog_push.sh" >&2
   exit 1
 fi
+cp "$INSTALL_DIR/bog_push.sh" "$DEST_DIR/bog_push.sh"
+chmod +x "$DEST_DIR/bog_push.sh"
+echo "✓ Installed bog_push.sh to $DEST_DIR/bog_push.sh"
 
-# Copy the bog_push script into ~/bogachev/bin and make it executable
-cp "$INSTALL_DIR/$SCRIPT_NAME" "$DEST_PATH"
-chmod +x "$DEST_PATH"
-echo "Copied bog_push script to $DEST_PATH"
+# Install bog_pull.sh
+echo "Installing bog_pull.sh..."
+if [ ! -f "$INSTALL_DIR/bog_pull.sh" ]; then
+  echo "Error: bog_pull.sh not found at $INSTALL_DIR/bog_pull.sh" >&2
+  exit 1
+fi
+cp "$INSTALL_DIR/bog_pull.sh" "$DEST_DIR/bog_pull.sh"
+chmod +x "$DEST_DIR/bog_pull.sh"
+echo "✓ Installed bog_pull.sh to $DEST_DIR/bog_pull.sh"
 
-# Add ~/bogachev/bin to PATH in ~/.bashrc if it's not already there
+# Add ~/bogachev/bin to PATH in env file if it's not already there
 if ! grep -qx 'export PATH="$HOME/bogachev/bin:$PATH"' "$ENV_FILE"; then
   echo '' >> "$ENV_FILE"
-  echo '# Add user bin for bog_push' >> "$ENV_FILE"
+  echo '# Add user bin for bogachev scripts' >> "$ENV_FILE"
   echo 'export PATH="$HOME/bogachev/bin:$PATH"' >> "$ENV_FILE"
-  echo "Added ~/bogachev/bin to PATH in ~/.bashrc"
+  echo "Added ~/bogachev/bin to PATH"
 fi
 
 # Disable cleanup on normal exit (setup completed successfully)
@@ -258,7 +264,9 @@ echo "  • Student name: $STUDENT_DISPLAY_NAME"
 echo "  • Git identity: $GIT_USER_NAME <$GIT_USER_EMAIL>"
 echo "  • SSH key: $SSH_PATH"
 echo "  • Repository: $CLONE_DIR"
-echo "  • bog_push.sh installed to: $DEST_PATH"
+echo "  • Scripts installed to: $DEST_DIR/"
+echo "    - bog_push.sh (submit homework)"
+echo "    - bog_pull.sh (update repository)"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
