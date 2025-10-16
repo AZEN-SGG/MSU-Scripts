@@ -107,7 +107,23 @@ cat "${SSH_PATH}.pub"
 echo
 read -p "Press Enter once you've added the key on GitHub..." dummy
 
-# === Step 3.1: Verify SSH auth to GitHub ===
+# === Step 3.1: Add GitHub to known_hosts ===
+echo "Adding GitHub to known_hosts..."
+
+# Ensure ~/.ssh directory exists
+mkdir -p "$HOME/.ssh"
+chmod 700 "$HOME/.ssh"
+
+# Add GitHub's SSH keys to known_hosts
+# This prevents the "authenticity of host" prompt on first connection
+ssh-keyscan github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null
+if [ $? -eq 0 ]; then
+  echo "GitHub added to known_hosts successfully."
+else
+  echo "Warning: Could not add GitHub to known_hosts automatically." >&2
+fi
+
+# === Step 3.2: Verify SSH auth to GitHub ===
 echo "Verifying SSH access to GitHub..."
 
 SSH_TEST_OUTPUT=$(ssh -o BatchMode=yes -T git@github.com 2>&1 || true)

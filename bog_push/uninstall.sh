@@ -90,6 +90,24 @@ else
   info "SSH key name not set, skipping key removal"
 fi
 
+# === Step 1.1: Remove GitHub from known_hosts (optional) ===
+if [ -f "$HOME/.ssh/known_hosts" ]; then
+  if grep -q "github.com" "$HOME/.ssh/known_hosts" 2>/dev/null; then
+    echo ""
+    read -p "Remove GitHub from known_hosts? [y/N]: " -r REMOVE_KNOWN_HOST
+    if [[ "$REMOVE_KNOWN_HOST" =~ ^[Yy]$ ]]; then
+      # Create a backup
+      cp "$HOME/.ssh/known_hosts" "$HOME/.ssh/known_hosts.backup.$(date +%Y%m%d%H%M%S)"
+      # Remove all github.com entries
+      grep -v "github.com" "$HOME/.ssh/known_hosts" > "$HOME/.ssh/known_hosts.tmp"
+      mv "$HOME/.ssh/known_hosts.tmp" "$HOME/.ssh/known_hosts"
+      success "✓ GitHub removed from known_hosts (backup created)"
+    else
+      info "GitHub kept in known_hosts"
+    fi
+  fi
+fi
+
 # === Step 2: Remove bog_push script and ~/bogachev directory ===
 BOGACHEV_DIR="$HOME/bogachev"
 if [ -d "$BOGACHEV_DIR" ]; then
