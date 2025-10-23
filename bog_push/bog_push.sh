@@ -190,4 +190,3 @@ else
   echo "Try running 'git push origin main' manually from: $GITHUB_REPO_CLONE_DIR"
   exit 1
 fi
-
