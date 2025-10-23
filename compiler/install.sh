@@ -93,8 +93,8 @@ if [ ! -f "$SCRIPT_DIR/libs/libgcc_leaks_rbtree.o" ]; then
 fi
 
 # Проверяем наличие LeakAnalyze
-if [ ! -f "$SCRIPT_DIR/libs/LeakAnalyze" ]; then
-  error "Программа LeakAnalyze не найдена в $SCRIPT_DIR/libs/"
+if [ ! -f "$SCRIPT_DIR/bin/LeakAnalyze" ]; then
+  error "Программа LeakAnalyze не найдена в $SCRIPT_DIR/bin/"
   exit 1
 fi
 
@@ -122,7 +122,7 @@ mkdir -p "$BOGACHEV_BIN/LeakAnalyze"
 # Копируем библиотеки
 cp "$SCRIPT_DIR/libs/libgcc_leaks_tracer.o" "$BOGACHEV_BIN/LeakAnalyze/"
 cp "$SCRIPT_DIR/libs/libgcc_leaks_rbtree.o" "$BOGACHEV_BIN/LeakAnalyze/"
-cp "$SCRIPT_DIR/libs/LeakAnalyze" "$BOGACHEV_BIN/LeakAnalyze/"
+cp "$SCRIPT_DIR/bin/LeakAnalyze" "$BOGACHEV_BIN/LeakAnalyze/"
 chmod +x "$BOGACHEV_BIN/LeakAnalyze/LeakAnalyze"
 
 success "✓ Файлы скопированы"

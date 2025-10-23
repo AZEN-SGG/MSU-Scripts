@@ -42,6 +42,20 @@ g++ -c program.cpp
 
 ## Структура файлов
 
+### Исходная структура:
+```
+compiler/
+├── bin/
+│   └── LeakAnalyze        # Исполняемый файл
+├── libs/
+│   ├── libgcc_leaks_tracer.o
+│   └── libgcc_leaks_rbtree.o
+├── install.sh
+├── uninstall.sh
+└── test.sh
+```
+
+### После установки:
 ```
 ~/bogachev/bin/
 ├── LeakAnalyze/           # Программа LeakAnalyze
@@ -72,4 +86,4 @@ g++ -c program.cpp
 
 - Системные компиляторы gcc и g++ в `/usr/bin/`
 - Библиотеки в `compiler/libs/`
-- Программа LeakAnalyze в `compiler/libs/`
+- Программа LeakAnalyze в `compiler/bin/`
